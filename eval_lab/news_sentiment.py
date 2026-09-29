@@ -15,9 +15,8 @@ Stages, each fixing something the 2022 pipeline got wrong:
   3. dedupe     Syndicated copies of one story (same company, sentence-embedding
                 similarity >= 0.85, within 3 days) collapse into the earliest copy,
                 so one story isn't counted forty times.
-  4. scoring    VADER (PosiTech's baseline), the benchmark's best whole-text
-                classifier, and a zero-shot model asked whether the text is good
-                or bad news *for that specific company*.
+  4. scoring    The benchmark's best whole-text classifier, and a zero-shot model
+                asked whether the text is good or bad news *for that specific company*.
   5. market     Abnormal return vs SPY in the session that reacted to the document
                 (does the score describe price-moving news?) and in the session
                 after it (does it predict anything?): overall, on earnings days, and
@@ -215,15 +214,22 @@ def score_column(name: str, texts: pd.Series, targets: pd.Series | None = None) 
 
 # ---------------------------------------------------------------- 5. market
 
+BIG_MOVE = 0.03   # abnormal return of at least 3% vs the benchmark
+
 def market_metrics(items: pd.DataFrame, scorers: list[str]) -> pd.DataFrame:
     rows = []
     earnings_mask = items["on_earnings_day"].fillna(False).astype(bool)
     exact_mask = items["time_precision"].eq("exact")
     for source, s in items.groupby("source"):
         subsets = [("all", pd.Series(True, index=s.index)), ("exact_time", exact_mask.loc[s.index]),
-                   ("earnings_days", earnings_mask.loc[s.index])]
+                   ("earnings_days", earnings_mask.loc[s.index]), ("non_earnings_days", ~earnings_mask.loc[s.index]),
+                   ("big_moves", None)]
         for subset, mask in subsets:
             for window in ["reaction", "next_session"]:
+                if subset == "big_moves":
+                    # Days the stock moved at least BIG_MOVE vs the market in this window. This
+                    # conditions on the outcome, so it describes alignment; it can't test prediction.
+                    mask = s[f"{window}_abnormal"].abs() >= BIG_MOVE
                 for scorer in scorers:
                     d = s[mask][[f"{scorer}_score", f"{scorer}_label", f"{window}_abnormal", "ticker", "reaction_date"]].dropna()
                     if len(d) < 10:
@@ -267,7 +273,7 @@ def run(source: str, cfg: dict, prices: pd.DataFrame, earnings: pd.DataFrame, be
     items = mentions[mentions["is_unique"]].copy()
     print(f"{source}: {len(items)} unique company mentions; scoring...")
     names = items["ticker"].map(companies.display_name)
-    for scorer, targets in [(cfg["baseline"], None), (classifier, None), (cfg["entity_scorer"], names)]:
+    for scorer, targets in [(classifier, None), (cfg["entity_scorer"], names)]:
         scored = score_column(scorer, items["text"], targets)
         items[f"{scorer}_label"], items[f"{scorer}_score"] = scored["label"], scored["score"]
 
@@ -286,7 +292,7 @@ def main() -> None:
 
     cfg = sentiment_models.config()["pipeline"]
     classifier = pick_classifier(cfg)
-    scorers = [cfg["baseline"], classifier, cfg["entity_scorer"]]
+    scorers = [classifier, cfg["entity_scorer"]]
     src = source_db()
     prices = src.sql("SELECT ticker, date, adj_close FROM prices").df()
     earnings = src.sql("SELECT ticker, reaction_date FROM earnings WHERE reaction_date IS NOT NULL").df()
@@ -315,8 +321,6 @@ def main() -> None:
     write_report(examples, "news_relevance_examples.csv")
 
     print("\nfunnel:\n" + pd.DataFrame(funnels).set_index("source").T.to_string())
-    agreement = unique.assign(same=unique[f"{cfg['baseline']}_label"] == unique[f"{classifier}_label"]).groupby("source")["same"].mean()
-    print(f"\nVADER agrees with {classifier} on {', '.join(f'{s} {v:.0%}' for s, v in agreement.items())} of unique mentions")
     if len(metrics):
         cols = ["source", "subset", "window", "scorer", "n", "spearman", "direction_hit_rate", "spread_bps", "spread_p_value"]
         print("\nmarket check:\n" + metrics[cols].round(3).to_string(index=False))

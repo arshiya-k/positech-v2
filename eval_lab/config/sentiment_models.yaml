@@ -55,7 +55,6 @@ scorers:
 
 # Settings for eval_lab.news_sentiment, the rebuilt pipeline.
 pipeline:
-  baseline: vader                 # PosiTech's scorer, kept for comparison
   classifier: auto                # auto = best whole-text classifier in reports/sentiment_benchmark.csv
   entity_scorer: zeroshot_deberta # sentiment toward each recognized company
   ner_model: urchade/gliner_medium-v2.1
