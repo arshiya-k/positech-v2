@@ -1,0 +1,50 @@
+# Companies covered by the Eval Lab. Three per GICS sector so samples can be
+# stratified by sector; PosiTech's original four tickers are marked `positech`.
+#
+# ciks: SEC filer IDs to pull, when the ticker file's current mapping isn't
+# enough. ExxonMobil reorganized under a new parent (ExxonMobil Holdings Corp,
+# CIK 2115436) that took over the XOM ticker; 20 years of filings remain under
+# Exxon Mobil Corporation (CIK 34088), so both are listed and merged.
+#
+# names: how the company is referred to in text, used to search news, to link
+# recognized company names to tickers, and to check whether a post is on topic.
+# The first name is used when asking "is this good news for <name>?".
+#
+# fy_convention: how the company labels its fiscal year when the year ends in
+# Jan/early Feb. NVDA and WMT call the year ending Jan 2025 "FY2025" (end_year);
+# Home Depot calls the year ending Feb 2, 2025 "fiscal 2024" (start_year).
+start_date: "2018-01-01"
+fiscal_years: [2019, 2020, 2021, 2022, 2023, 2024]
+benchmark: SPY
+
+companies:
+  - {ticker: AAPL,  sector: Information Technology, positech: true, names: [Apple]}
+  - {ticker: NVDA,  sector: Information Technology, names: [Nvidia]}
+  - {ticker: IBM,   sector: Information Technology, positech: true, names: [IBM, International Business Machines]}
+  - {ticker: GOOGL, sector: Communication Services, positech: true, names: [Alphabet, Google]}
+  - {ticker: META,  sector: Communication Services, positech: true, names: [Meta Platforms, Meta, Facebook]}
+  - {ticker: NFLX,  sector: Communication Services, names: [Netflix]}
+  - {ticker: AMZN,  sector: Consumer Discretionary, names: [Amazon]}
+  - {ticker: HD,    sector: Consumer Discretionary, fy_convention: start_year, names: [Home Depot]}
+  - {ticker: NKE,   sector: Consumer Discretionary, names: [Nike]}
+  - {ticker: WMT,   sector: Consumer Staples, names: [Walmart]}
+  - {ticker: PG,    sector: Consumer Staples, names: [Procter & Gamble, P&G]}
+  - {ticker: KO,    sector: Consumer Staples, names: [Coca-Cola, Coca Cola]}
+  - {ticker: JPM,   sector: Financials, names: [JPMorgan, JPMorgan Chase, JP Morgan]}
+  - {ticker: GS,    sector: Financials, names: [Goldman Sachs]}
+  - {ticker: V,     sector: Financials, names: [Visa]}
+  - {ticker: JNJ,   sector: Health Care, names: [Johnson & Johnson, J&J]}
+  - {ticker: UNH,   sector: Health Care, names: [UnitedHealth, UnitedHealthcare]}
+  - {ticker: PFE,   sector: Health Care, names: [Pfizer]}
+  - {ticker: XOM,   sector: Energy, ciks: [34088, 2115436], names: [ExxonMobil, Exxon Mobil, Exxon]}
+  - {ticker: CVX,   sector: Energy, names: [Chevron]}
+  - {ticker: COP,   sector: Energy, names: [ConocoPhillips]}
+  - {ticker: CAT,   sector: Industrials, names: [Caterpillar]}
+  - {ticker: HON,   sector: Industrials, names: [Honeywell]}
+  - {ticker: DE,    sector: Industrials, names: [John Deere, Deere]}
+  - {ticker: NEE,   sector: Utilities, names: [NextEra Energy, NextEra]}
+  - {ticker: DUK,   sector: Utilities, names: [Duke Energy]}
+  - {ticker: SO,    sector: Utilities, names: [Southern Company, Southern Co]}
+  - {ticker: LIN,   sector: Materials, names: [Linde]}
+  - {ticker: SHW,   sector: Materials, names: [Sherwin-Williams]}
+  - {ticker: APD,   sector: Materials, names: [Air Products]}

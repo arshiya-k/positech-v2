@@ -1,0 +1,7 @@
+labeler,reference,reference_kind,subset,n,accuracy,macro_f1,cohen_kappa,spearman_vs_return,direction_hit_rate
+vader:positech,vader,VADER re-run on the stored text (no human labels),all,150,0.58,0.5499350285572154,0.34315701675123367,,
+vader:positech,vader,VADER re-run on the stored text (no human labels),relevant_only,61,0.7540983606557377,0.7487710420897278,0.6176347680735479,,
+vader,next-day abnormal return,,all,150,,,,-0.03954928959134942,0.51
+vader,next-day abnormal return,,relevant_only,61,,,,0.02801362165815672,0.5476190476190477
+vader:positech,next-day abnormal return,,all,150,,,,-0.05623179074532007,0.4634146341463415
+vader:positech,next-day abnormal return,,relevant_only,61,,,,0.0936548129506634,0.5208333333333334

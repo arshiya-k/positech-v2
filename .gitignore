@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/lab/
+eval_lab/annotation/batches/*.json
+.DS_Store
+
+# Large per-item reports; regenerate with make sentiment-benchmark / make news-sentiment
+reports/news_items.csv
+reports/sentiment_benchmark_items.csv

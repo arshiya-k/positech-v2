@@ -1,0 +1,25 @@
+seed: 42
+
+# Financial Q&A benchmark: a fixed quota per question template, and within
+# each template the quota is spread proportionally across sectors (every sector
+# gets at least one task when the quota allows). Quotas are per template so the
+# ~900 earnings events can't crowd out the other market questions.
+qa:
+  quotas:
+    lookup_revenue: 15          # factual_lookup
+    lookup_eps: 15
+    lookup_q4_revenue: 15
+    calc_revenue_growth: 20     # calculation
+    calc_operating_margin: 20
+    calc_pe: 15                 # market_calc
+    market_total_return: 10
+    earnings_reaction: 20
+    reasoning_margin_drivers: 30
+  strata: [sector]
+
+# Sentiment benchmark over PosiTech's scraped posts. Stratifying on the VADER
+# class keeps rare negative posts from being drowned out by positive ones.
+sentiment:
+  n: 150
+  strata: [source, ticker, vader_class]
+  exclude_duplicates: true

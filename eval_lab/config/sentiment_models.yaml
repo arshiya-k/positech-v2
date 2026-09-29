@@ -1,0 +1,66 @@
+# Sentiment scorers compared by `eval_lab.sentiment_benchmark` and used by
+# `eval_lab.news_sentiment`. Everything runs locally; model weights download from
+# Hugging Face on first use.
+#
+# trained_on: benchmark datasets a model was fine-tuned on, per its model card.
+# A model's score on its own training data is inflated, so the benchmark reports
+# it but leaves it out of the ranking.
+
+device: auto        # auto picks mps (Apple GPU), then cuda, then cpu
+half_precision: true   # fp16 on GPU: about 2x faster; the benchmark checks labels don't change
+batch_size: 64
+max_tokens: 256     # transformer input limit per text; longer posts are truncated
+
+scorers:
+  vader:
+    kind: vader
+    note: PosiTech's original scorer, a general-purpose word list (2014)
+  loughran_mcdonald:
+    kind: lm_dictionary
+    note: finance word lists built from 10-K filings (Loughran & McDonald)
+  finbert:
+    kind: classifier
+    model: ProsusAI/finbert
+    trained_on: [financial_phrasebank]
+  finbert_tone:
+    kind: classifier
+    model: yiyanghkust/finbert-tone
+    labels: {0: neutral, 1: positive, 2: negative}   # its config ships without label names
+    note: trained on analyst reports, earnings calls and 10-Ks
+  distilroberta_fin:
+    kind: classifier
+    model: mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis
+    trained_on: [financial_phrasebank]
+  finsense_modernbert:
+    kind: classifier
+    model: AnkitAI/FinSense-ModernBERT-Financial-News-Sentiment-Analysis
+    trained_on: [financial_phrasebank]
+  roberta_large_fin:
+    kind: classifier
+    model: soleimanian/financial-roberta-large-sentiment
+    note: trained on 10-Ks, earnings calls and analyst reports
+  twitter_roberta:
+    kind: classifier
+    model: cardiffnlp/twitter-roberta-base-sentiment-latest
+    note: general-purpose sentiment trained on tweets, not finance-specific
+  zeroshot_deberta:
+    kind: zero_shot
+    model: MoritzLaurer/deberta-v3-base-zeroshot-v2.0
+    note: asks "is this good or bad news for <company>?", so it scores sentiment toward a target
+    hypotheses:
+      positive: "This is good news for {target}."
+      negative: "This is bad news for {target}."
+      neutral: "This is neither good nor bad news for {target}."
+    default_target: the company
+
+# Settings for eval_lab.news_sentiment, the rebuilt pipeline.
+pipeline:
+  baseline: vader                 # PosiTech's scorer, kept for comparison
+  classifier: auto                # auto = best whole-text classifier in reports/sentiment_benchmark.csv
+  entity_scorer: zeroshot_deberta # sentiment toward each recognized company
+  ner_model: urchade/gliner_medium-v2.1
+  ner_labels: [company, stock]     # "stock" catches headlines like "Is Alphabet Stock a Buy?"
+  ner_threshold: 0.5
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  duplicate_similarity: 0.85      # cosine similarity above which two headlines are the same story
+  duplicate_days: 3               # ...if they're about the same company within this many days

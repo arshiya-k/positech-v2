@@ -1,0 +1,61 @@
+# Canonical metrics pulled from SEC XBRL "companyfacts". Companies switch tags
+# over time (e.g. Revenues -> RevenueFromContractWithCustomer... after ASC 606)
+# and industries tag differently, so each metric lists concepts in priority
+# order and we take the first one reported for each period. The fallbacks below
+# were added after the data-quality report flagged the gaps.
+#
+# Known gaps that no fallback fixes:
+#   - banks, oil majors, pharma and others (JPM, GS, XOM, CVX, COP, PFE, IBM,
+#     NKE) don't present an operating-income subtotal at all
+#   - Visa (and Alphabet before 2022) report EPS and share counts per share
+#     class, which XBRL tags dimensionally; the companyfacts API only carries
+#     undimensioned facts, so those values aren't available here
+metrics:
+  revenue:
+    kind: duration
+    unit: USD
+    select: largest   # a total revenue line is never smaller than a subset tagged alongside it
+    concepts:
+      - us-gaap:Revenues
+      - us-gaap:RegulatedAndUnregulatedOperatingRevenue                # utilities' total operating revenue (NEE, DUK)
+      - us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax
+      - us-gaap:RevenueFromContractWithCustomerIncludingAssessedTax   # a subset for utilities: contracts only
+      - us-gaap:SalesRevenueNet
+      - us-gaap:RevenuesNetOfInterestExpense
+  operating_income:
+    kind: duration
+    unit: USD
+    concepts: [us-gaap:OperatingIncomeLoss]
+  net_income:
+    kind: duration
+    unit: USD
+    concepts:
+      - us-gaap:NetIncomeLoss
+      - us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic   # CAT, SO
+      - us-gaap:ProfitLoss                                        # includes noncontrolling interests
+  eps_diluted:
+    kind: duration
+    unit: USD/shares
+    concepts: [us-gaap:EarningsPerShareDiluted]
+  diluted_shares:
+    kind: duration
+    unit: shares
+    concepts:
+      - us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding
+      - us-gaap:WeightedAverageNumberOfShareOutstandingBasicAndDiluted   # XOM reports one combined count
+  operating_cash_flow:
+    kind: duration
+    unit: USD
+    concepts:
+      - us-gaap:NetCashProvidedByUsedInOperatingActivities
+      - us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations   # APD, LIN
+  total_assets:
+    kind: instant
+    unit: USD
+    concepts: [us-gaap:Assets]
+  total_equity:
+    kind: instant
+    unit: USD
+    concepts:
+      - us-gaap:StockholdersEquity
+      - us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest

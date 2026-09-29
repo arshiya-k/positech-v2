@@ -1,0 +1,89 @@
+sector,population_n,sample_n,population_share,sample_share,design_weight,template_id
+Communication Services,18,2,0.1,0.13333333333333333,9.0,lookup_revenue
+Consumer Discretionary,18,2,0.1,0.13333333333333333,9.0,lookup_revenue
+Consumer Staples,18,2,0.1,0.13333333333333333,9.0,lookup_revenue
+Energy,18,2,0.1,0.13333333333333333,9.0,lookup_revenue
+Financials,18,2,0.1,0.13333333333333333,9.0,lookup_revenue
+Health Care,18,1,0.1,0.06666666666666667,18.0,lookup_revenue
+Industrials,18,1,0.1,0.06666666666666667,18.0,lookup_revenue
+Information Technology,18,1,0.1,0.06666666666666667,18.0,lookup_revenue
+Materials,18,1,0.1,0.06666666666666667,18.0,lookup_revenue
+Utilities,18,1,0.1,0.06666666666666667,18.0,lookup_revenue
+Communication Services,18,2,0.10344827586206896,0.13333333333333333,9.0,lookup_eps
+Consumer Discretionary,18,2,0.10344827586206896,0.13333333333333333,9.0,lookup_eps
+Consumer Staples,18,2,0.10344827586206896,0.13333333333333333,9.0,lookup_eps
+Energy,18,2,0.10344827586206896,0.13333333333333333,9.0,lookup_eps
+Financials,12,1,0.06896551724137931,0.06666666666666667,12.0,lookup_eps
+Health Care,18,2,0.10344827586206896,0.13333333333333333,9.0,lookup_eps
+Industrials,18,1,0.10344827586206896,0.06666666666666667,18.0,lookup_eps
+Information Technology,18,1,0.10344827586206896,0.06666666666666667,18.0,lookup_eps
+Materials,18,1,0.10344827586206896,0.06666666666666667,18.0,lookup_eps
+Utilities,18,1,0.10344827586206896,0.06666666666666667,18.0,lookup_eps
+Communication Services,12,1,0.09090909090909091,0.06666666666666667,12.0,lookup_q4_revenue
+Consumer Discretionary,15,2,0.11363636363636363,0.13333333333333333,7.5,lookup_q4_revenue
+Consumer Staples,14,2,0.10606060606060606,0.13333333333333333,7.0,lookup_q4_revenue
+Energy,18,2,0.13636363636363635,0.13333333333333333,9.0,lookup_q4_revenue
+Financials,11,1,0.08333333333333333,0.06666666666666667,11.0,lookup_q4_revenue
+Health Care,13,2,0.09848484848484848,0.13333333333333333,6.5,lookup_q4_revenue
+Industrials,11,1,0.08333333333333333,0.06666666666666667,11.0,lookup_q4_revenue
+Information Technology,14,2,0.10606060606060606,0.13333333333333333,7.0,lookup_q4_revenue
+Materials,12,1,0.09090909090909091,0.06666666666666667,12.0,lookup_q4_revenue
+Utilities,12,1,0.09090909090909091,0.06666666666666667,12.0,lookup_q4_revenue
+Communication Services,18,2,0.1,0.1,9.0,calc_revenue_growth
+Consumer Discretionary,18,2,0.1,0.1,9.0,calc_revenue_growth
+Consumer Staples,18,2,0.1,0.1,9.0,calc_revenue_growth
+Energy,18,2,0.1,0.1,9.0,calc_revenue_growth
+Financials,18,2,0.1,0.1,9.0,calc_revenue_growth
+Health Care,18,2,0.1,0.1,9.0,calc_revenue_growth
+Industrials,18,2,0.1,0.1,9.0,calc_revenue_growth
+Information Technology,18,2,0.1,0.1,9.0,calc_revenue_growth
+Materials,18,2,0.1,0.1,9.0,calc_revenue_growth
+Utilities,18,2,0.1,0.1,9.0,calc_revenue_growth
+Communication Services,18,3,0.14754098360655737,0.15,6.0,calc_operating_margin
+Consumer Discretionary,12,2,0.09836065573770492,0.1,6.0,calc_operating_margin
+Consumer Staples,18,3,0.14754098360655737,0.15,6.0,calc_operating_margin
+Financials,6,1,0.04918032786885246,0.05,6.0,calc_operating_margin
+Health Care,6,1,0.04918032786885246,0.05,6.0,calc_operating_margin
+Industrials,15,2,0.12295081967213115,0.1,7.5,calc_operating_margin
+Information Technology,12,2,0.09836065573770492,0.1,6.0,calc_operating_margin
+Materials,17,3,0.13934426229508196,0.15,5.666666666666667,calc_operating_margin
+Utilities,18,3,0.14754098360655737,0.15,6.0,calc_operating_margin
+Communication Services,18,2,0.10588235294117647,0.13333333333333333,9.0,calc_pe
+Consumer Discretionary,17,1,0.1,0.06666666666666667,17.0,calc_pe
+Consumer Staples,18,2,0.10588235294117647,0.13333333333333333,9.0,calc_pe
+Energy,15,1,0.08823529411764706,0.06666666666666667,15.0,calc_pe
+Financials,12,1,0.07058823529411765,0.06666666666666667,12.0,calc_pe
+Health Care,18,2,0.10588235294117647,0.13333333333333333,9.0,calc_pe
+Industrials,18,2,0.10588235294117647,0.13333333333333333,9.0,calc_pe
+Information Technology,18,2,0.10588235294117647,0.13333333333333333,9.0,calc_pe
+Materials,18,1,0.10588235294117647,0.06666666666666667,18.0,calc_pe
+Utilities,18,1,0.10588235294117647,0.06666666666666667,18.0,calc_pe
+Communication Services,18,1,0.1,0.1,18.0,market_total_return
+Consumer Discretionary,18,1,0.1,0.1,18.0,market_total_return
+Consumer Staples,18,1,0.1,0.1,18.0,market_total_return
+Energy,18,1,0.1,0.1,18.0,market_total_return
+Financials,18,1,0.1,0.1,18.0,market_total_return
+Health Care,18,1,0.1,0.1,18.0,market_total_return
+Industrials,18,1,0.1,0.1,18.0,market_total_return
+Information Technology,18,1,0.1,0.1,18.0,market_total_return
+Materials,18,1,0.1,0.1,18.0,market_total_return
+Utilities,18,1,0.1,0.1,18.0,market_total_return
+Communication Services,72,2,0.1,0.1,36.0,earnings_reaction
+Consumer Discretionary,72,2,0.1,0.1,36.0,earnings_reaction
+Consumer Staples,72,2,0.1,0.1,36.0,earnings_reaction
+Energy,72,2,0.1,0.1,36.0,earnings_reaction
+Financials,72,2,0.1,0.1,36.0,earnings_reaction
+Health Care,72,2,0.1,0.1,36.0,earnings_reaction
+Industrials,72,2,0.1,0.1,36.0,earnings_reaction
+Information Technology,72,2,0.1,0.1,36.0,earnings_reaction
+Materials,72,2,0.1,0.1,36.0,earnings_reaction
+Utilities,72,2,0.1,0.1,36.0,earnings_reaction
+Communication Services,18,4,0.1487603305785124,0.13333333333333333,4.5,reasoning_margin_drivers
+Consumer Discretionary,12,3,0.09917355371900827,0.1,4.0,reasoning_margin_drivers
+Consumer Staples,18,4,0.1487603305785124,0.13333333333333333,4.5,reasoning_margin_drivers
+Financials,6,2,0.049586776859504134,0.06666666666666667,3.0,reasoning_margin_drivers
+Health Care,6,2,0.049586776859504134,0.06666666666666667,3.0,reasoning_margin_drivers
+Industrials,14,4,0.11570247933884298,0.13333333333333333,3.5,reasoning_margin_drivers
+Information Technology,12,3,0.09917355371900827,0.1,4.0,reasoning_margin_drivers
+Materials,17,4,0.14049586776859505,0.13333333333333333,4.25,reasoning_margin_drivers
+Utilities,18,4,0.1487603305785124,0.13333333333333333,4.5,reasoning_margin_drivers

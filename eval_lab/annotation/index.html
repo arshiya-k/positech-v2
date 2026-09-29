@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubric Annotator</title>
+<style>
+  :root {
+    --bg: #f6f6f2; --panel: #ffffff; --ink: #1d2b2d; --muted: #5b6b6d; --line: #d9dfdc;
+    --accent: #388087; --accent-soft: #e3eff0; --warn: #b4532a; --ok: #2f7d4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121819; --panel: #1b2325; --ink: #e6ecec; --muted: #9aabac; --line: #2e3a3c;
+            --accent: #6fb7be; --accent-soft: #203436; --warn: #e08a62; --ok: #6cc28f; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 16px; margin: 0 8px 0 0; }
+  header input, header select, button { font: inherit; color: inherit; }
+  header input[type=text], header select { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+  button { padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .45; cursor: default; }
+  .progress { flex: 1 1 160px; min-width: 120px; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+  .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; padding: 16px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+  .field { margin-bottom: 14px; }
+  .field .label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
+  .field .value { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .field .value.long { max-height: 46vh; overflow: auto; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+  .field .value.mono { font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .field a { color: var(--accent); }
+  .dim { padding: 10px; border-radius: 8px; border: 1px solid transparent; margin-bottom: 8px; }
+  .dim.active { border-color: var(--accent); background: var(--accent-soft); }
+  .dim .q { font-weight: 600; margin-bottom: 6px; }
+  .dim .q .key { font: 12px ui-monospace, monospace; color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opts button { min-width: 40px; }
+  .opts button.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .opts button kbd { font-size: 11px; opacity: .6; margin-right: 4px; }
+  .anchor { font-size: 13px; color: var(--muted); margin-top: 4px; min-height: 1.4em; }
+  .flags { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 10px; }
+  textarea { width: 100%; min-height: 60px; font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  .nav { display: flex; gap: 8px; justify-content: space-between; margin-top: 12px; flex-wrap: wrap; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .empty { max-width: 640px; margin: 48px auto; padding: 0 16px; color: var(--muted); }
+  .empty code { background: var(--panel); padding: 1px 5px; border-radius: 4px; }
+  .status-done { color: var(--ok); } .status-todo { color: var(--warn); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rubric Annotator</h1>
+  <select id="batchList" aria-label="Batch" hidden></select>
+  <label><input type="file" id="batchFile" accept=".json"> </label>
+  <input type="text" id="annotator" placeholder="Your name" aria-label="Annotator name" size="12">
+  <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+  <span class="count" id="count"></span>
+  <button id="exportBtn" class="primary" disabled>Export labels</button>
+</header>
+
+<div id="empty" class="empty">
+  <p>Load a batch exported by <code>python -m eval_lab.annotation export sentiment</code>.</p>
+  <p>Run <code>make annotate</code> to pick batches from the list above, or choose the JSON file directly.
+  Your labels are saved in this browser as you go. Use <b>Export labels</b> when you're done, then
+  <code>python -m eval_lab.annotation import &lt;file&gt;</code>.</p>
+</div>
+
+<main id="app" hidden>
+  <section id="itemPanel" aria-label="Item"></section>
+  <section aria-label="Rubric">
+    <div id="dims"></div>
+    <div class="flags" id="flags"></div>
+    <textarea id="note" placeholder="Note (optional): anything a reviewer should know"></textarea>
+    <div class="nav">
+      <button id="prevBtn">&larr; Previous</button>
+      <span class="count" id="itemStatus"></span>
+      <button id="nextBtn" class="primary">Save &amp; next &rarr;</button>
+    </div>
+    <div class="hint">Keys: number keys pick an option for the highlighted question, &uarr;/&darr; move between questions, Enter saves and moves on, &larr;/&rarr; browse items.</div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { batch: null, index: 0, active: 0, labels: {}, startedAt: null };
+
+const store = {
+  key: () => `annotator:${state.batch.batch_id}:${($("annotator").value || "anon").trim().toLowerCase()}`,
+  load() { try { return JSON.parse(localStorage.getItem(this.key()) || "{}"); } catch { return {}; } },
+  save() { try { localStorage.setItem(this.key(), JSON.stringify(state.labels)); } catch { /* storage unavailable: labels stay in memory */ } },
+};
+try { $("annotator").value = localStorage.getItem("annotator:name") || ""; } catch {}
+
+const fill = (text, ctx) => String(text).replace(/\{(\w+)\}/g, (m, k) => (ctx && k in ctx ? ctx[k] : m));
+const dims = () => state.batch.rubric.dimensions;
+const optionsOf = (d) => d.type === "scale" ? Array.from({ length: d.max - d.min + 1 }, (_, i) => d.min + i) : d.options;
+const current = () => state.batch.items[state.index];
+const labelOf = (item) => state.labels[item.item_id] || (state.labels[item.item_id] = { values: {}, flags: [], note: "", seconds: 0 });
+const isDone = (item) => { const l = state.labels[item.item_id]; return !!l && dims().every((d) => l.values[d.key] !== undefined); };
+
+function tick() {
+  if (state.startedAt == null || !state.batch) return;
+  const l = labelOf(current());
+  l.seconds = Math.round((l.seconds + (Date.now() - state.startedAt) / 1000) * 10) / 10;
+  state.startedAt = Date.now();
+}
+
+function loadBatch(batch) {
+  state.batch = batch; state.index = 0; state.active = 0;
+  state.labels = store.load();
+  const firstTodo = batch.items.findIndex((it) => !isDone(it));
+  state.index = firstTodo === -1 ? 0 : firstTodo;
+  state.startedAt = Date.now();
+  $("empty").hidden = true; $("app").hidden = false; $("exportBtn").disabled = false;
+  render();
+}
+
+function render() {
+  const item = current(), l = labelOf(item);
+
+  const panel = $("itemPanel"); panel.replaceChildren();
+  for (const f of item.fields) {
+    const wrap = document.createElement("div"); wrap.className = "field";
+    const lab = document.createElement("div"); lab.className = "label"; lab.textContent = f.label;
+    const val = document.createElement("div"); val.className = "value" + (f.long ? " long" : "") + (f.mono ? " mono" : "");
+    if (f.link && f.value) {
+      const a = document.createElement("a"); a.href = f.value; a.textContent = f.value; a.target = "_blank"; a.rel = "noopener noreferrer"; val.append(a);
+    } else { val.textContent = f.value ?? ""; }
+    wrap.append(lab, val); panel.append(wrap);
+  }
+
+  const box = $("dims"); box.replaceChildren();
+  dims().forEach((d, di) => {
+    const el = document.createElement("div"); el.className = "dim" + (di === state.active ? " active" : "");
+    el.addEventListener("click", () => { state.active = di; highlight(); });
+    const q = document.createElement("div"); q.className = "q"; q.textContent = fill(d.question, item.context);
+    const key = document.createElement("span"); key.className = "key"; key.textContent = d.key; q.append(key);
+    const opts = document.createElement("div"); opts.className = "opts";
+    const anchor = document.createElement("div"); anchor.className = "anchor";
+    const showAnchor = (v) => { anchor.textContent = d.anchors && d.anchors[v] !== undefined ? d.anchors[v] : ""; };
+    optionsOf(d).forEach((v, oi) => {
+      const b = document.createElement("button"); b.type = "button";
+      const k = document.createElement("kbd"); k.textContent = oi + 1;
+      b.append(k, document.createTextNode(d.type === "scale" && v > 0 && d.min < 0 ? `+${v}` : v));
+      if (l.values[d.key] === v) b.classList.add("sel");
+      b.addEventListener("mouseenter", () => showAnchor(v));
+      b.addEventListener("mouseleave", () => showAnchor(l.values[d.key]));
+      b.addEventListener("click", (e) => { e.stopPropagation(); choose(di, v); });
+      opts.append(b);
+    });
+    showAnchor(l.values[d.key]);
+    el.append(q, opts, anchor); box.append(el);
+  });
+
+  const flags = $("flags"); flags.replaceChildren();
+  for (const f of state.batch.rubric.flags || []) {
+    const lab = document.createElement("label"); const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = l.flags.includes(f);
+    cb.addEventListener("change", () => { l.flags = cb.checked ? [...l.flags, f] : l.flags.filter((x) => x !== f); store.save(); });
+    lab.append(cb, document.createTextNode(" " + f.replaceAll("_", " "))); flags.append(lab);
+  }
+  $("note").value = l.note || "";
+  $("prevBtn").disabled = state.index === 0;
+  updateProgress();
+}
+
+function highlight() { [...$("dims").children].forEach((el, i) => el.classList.toggle("active", i === state.active)); }
+
+function choose(di, value) {
+  labelOf(current()).values[dims()[di].key] = value;
+  state.active = Math.min(di + 1, dims().length - 1);
+  store.save(); render();
+}
+
+function go(delta) {
+  tick(); store.save();
+  state.index = Math.max(0, Math.min(state.batch.items.length - 1, state.index + delta));
+  state.active = 0; render();
+}
+
+function saveAndNext() {
+  if (!isDone(current())) {
+    state.active = dims().findIndex((d) => labelOf(current()).values[d.key] === undefined); highlight(); return;
+  }
+  const next = state.batch.items.findIndex((it, i) => i > state.index && !isDone(it));
+  if (next === -1 && state.index === state.batch.items.length - 1) { tick(); store.save(); updateProgress(); return; }
+  go((next === -1 ? state.index + 1 : next) - state.index);
+}
+
+function updateProgress() {
+  const done = state.batch.items.filter(isDone).length, total = state.batch.items.length;
+  $("bar").style.width = `${(100 * done) / total}%`;
+  $("count").textContent = `${done}/${total} done`;
+  const s = $("itemStatus"); const ok = isDone(current());
+  s.textContent = `Item ${state.index + 1} of ${total} · ${ok ? "complete" : "incomplete"}`;
+  s.className = "count " + (ok ? "status-done" : "status-todo");
+}
+
+function exportLabels() {
+  tick(); store.save();
+  const annotator = ($("annotator").value || "").trim();
+  if (!annotator) { $("annotator").focus(); alert("Enter your name first so labels can be attributed."); return; }
+  const labels = state.batch.items.filter(isDone).map((it) => ({ item_id: it.item_id, ...state.labels[it.item_id] }));
+  const out = { batch_id: state.batch.batch_id, rubric_id: state.batch.rubric.id, rubric_version: state.batch.rubric.version,
+                annotator, exported_at: new Date().toISOString(), labels };
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
+  a.download = `${state.batch.batch_id}__${annotator.toLowerCase().replace(/\s+/g, "_")}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+$("note").addEventListener("input", (e) => { labelOf(current()).note = e.target.value; store.save(); });
+$("prevBtn").addEventListener("click", () => go(-1));
+$("nextBtn").addEventListener("click", saveAndNext);
+$("exportBtn").addEventListener("click", exportLabels);
+$("annotator").addEventListener("change", () => {
+  try { localStorage.setItem("annotator:name", $("annotator").value.trim()); } catch {}
+  if (state.batch) { state.labels = store.load(); render(); }
+});
+$("batchFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  try { loadBatch(JSON.parse(await file.text())); } catch (err) { alert("Could not read batch: " + err.message); }
+});
+$("batchList").addEventListener("change", (e) => e.target.value && fetchBatch(e.target.value));
+
+document.addEventListener("keydown", (e) => {
+  if (!state.batch || e.target.matches("textarea, input")) return;
+  const d = dims()[state.active];
+  if (/^[1-9]$/.test(e.key)) { const v = optionsOf(d)[Number(e.key) - 1]; if (v !== undefined) choose(state.active, v); }
+  else if (e.key === "ArrowDown") { state.active = Math.min(state.active + 1, dims().length - 1); highlight(); e.preventDefault(); }
+  else if (e.key === "ArrowUp") { state.active = Math.max(state.active - 1, 0); highlight(); e.preventDefault(); }
+  else if (e.key === "ArrowRight") go(1);
+  else if (e.key === "ArrowLeft") go(-1);
+  else if (e.key === "Enter") saveAndNext();
+});
+window.addEventListener("beforeunload", () => { if (state.batch) { tick(); store.save(); } });
+
+async function fetchBatch(path) {
+  try { const r = await fetch(path); loadBatch(await r.json()); } catch (err) { alert("Could not load " + path + ": " + err.message); }
+}
+
+// When served over HTTP (`make annotate`), list the batches directory.
+(async () => {
+  const fromUrl = new URLSearchParams(location.search).get("batch");
+  if (fromUrl) return fetchBatch(fromUrl);
+  if (location.protocol === "file:") return;
+  try {
+    const html = await (await fetch("batches/")).text();
+    const files = [...html.matchAll(/href="([^"]+\.json)"/g)].map((m) => decodeURIComponent(m[1])).sort().reverse();
+    if (!files.length) return;
+    const list = $("batchList"); list.hidden = false;
+    list.append(new Option("Choose a batch…", ""), ...files.map((f) => new Option(f.replace(/\.json$/, ""), "batches/" + f)));
+  } catch { /* no listing available: the file picker still works */ }
+})();
+</script>
+</body>
+</html>

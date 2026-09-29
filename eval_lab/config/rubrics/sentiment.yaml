@@ -1,0 +1,40 @@
+# Rubric for labeling scraped news / Reddit / Twitter posts about a stock.
+# The same file drives the annotation UI and the agreement metrics, so the
+# two stay in sync.
+id: sentiment
+version: 1
+item_kind: sentiment_post
+instructions: |
+  You are labeling a post that PosiTech's scraper associated with the stock
+  {ticker} ({company}). Source: {source}. Judge the text only; do not use
+  outside knowledge of what the stock did later.
+dimensions:
+  - key: relevance
+    type: scale
+    min: 1
+    max: 3
+    question: Is the post actually about {ticker} as a company or stock?
+    anchors:
+      1: Not about it (ticker matched by accident, another company, generic market list)
+      2: Mentions it in passing among other things
+      3: Primarily about the company or its stock
+  - key: sentiment
+    type: scale
+    min: -2
+    max: 2
+    question: What sentiment does the post express toward {ticker}'s stock (not the general mood of the text)?
+    anchors:
+      -2: Clearly bearish
+      -1: Somewhat bearish
+      0: Neutral, purely factual, or mixed
+      1: Somewhat bullish
+      2: Clearly bullish
+  - key: forward_looking
+    type: choice
+    options: ["yes", "no"]
+    question: Does it make a claim about future performance (guidance, price target, prediction)?
+  - key: content_type
+    type: choice
+    options: [news_fact, opinion, promo_or_spam, question, other]
+    question: What kind of content is this?
+flags: [sarcasm, non_english, truncated_text, needs_expert_review]
